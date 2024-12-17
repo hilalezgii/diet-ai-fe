@@ -1,18 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Form, Input, Button, Card } from 'antd';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
-import {LockOutlined, MailOutlined, OpenAIOutlined} from '@ant-design/icons';
+import 'react-toastify/dist/ReactToastify.css';
+import { LockOutlined, MailOutlined, OpenAIOutlined } from '@ant-design/icons';
+import {useFetch} from "../../hooks/useFetch.tsx";
 
-interface Values {
-    email: string;
-    password: string;
-}
-
-const RegisterPage: React.FC = () => {
+const LoginPage: React.FC = () => {
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
+    const { _fetch } = useFetch()
+
+    interface Values {
+        email: string;
+        password: string;
+    }
 
     const onFinish = async (values: Values) => {
+        setLoading(true);
         const { email, password } = values;
 
         const requestData = {
@@ -21,39 +26,36 @@ const RegisterPage: React.FC = () => {
         };
 
         try {
-            const serviceUrl = import.meta.env.VITE_SERVICE_URL!;
+            const fetchResponse = await _fetch({
+                url:'auth/login',
+                method:'POST',
+                data:requestData
+            })
 
-            const response = await fetch(`${serviceUrl}/users/register`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestData),
-            });
-
-            const data = await response.json();
-
-            if (response.ok) {
-                toast.success('Başarıyla kayıt olundu. Lütfen giriş yapınız');
-                navigate('/');
+            if (fetchResponse) {
+                localStorage.setItem('token', fetchResponse?.access_token || '');
+                toast.success('Giriş başarılı!');
+                setLoading(false);
+                navigate('/dashboard');
             } else {
-                toast.error('Lütfen bilgileri yeniden giriniz');
+                toast.error(fetchResponse.message || 'Giriş başarısız, tekrar deneyin.');
+                setLoading(false);
             }
         } catch (error) {
             toast.error('Bir hata oluştu, lütfen tekrar deneyin.');
+            setLoading(false);
         }
     };
 
     return (
         <div style={styles.container}>
-            <Card title={<div style={styles.cardTitle}><OpenAIOutlined /> Kayıt Ol</div>} style={styles.card}>
+            <Card title={<div style={styles.cardTitle}><OpenAIOutlined /> Giriş Yap  </div>} style={styles.card}>
                 <Form
-                    name="register"
+                    name="login"
+                    initialValues={{ remember: true }}
                     onFinish={onFinish}
                     autoComplete="off"
-                    style={styles.form}
                 >
-                    {/* Email */}
                     <Form.Item
                         label="E-posta"
                         name="email"
@@ -63,35 +65,30 @@ const RegisterPage: React.FC = () => {
                         ]}
                     >
                         <Input prefix={<MailOutlined />} placeholder="E-posta adresi" style={styles.input} />
-
                     </Form.Item>
 
-                    {/* Password */}
                     <Form.Item
                         label="Şifre"
                         name="password"
                         rules={[{ required: true, message: 'Lütfen şifrenizi girin!' }]}
                     >
                         <Input.Password prefix={<LockOutlined />} placeholder="Şifre" style={styles.input} />
-
                     </Form.Item>
 
-                    {/* Register Button */}
                     <Form.Item>
-                        <Button type="primary" htmlType="submit" block loading={false} style={styles.loginButton}>
-                            Kayıt Ol
+                        <Button type="primary" htmlType="submit" block loading={loading} style={styles.loginButton}>
+                            Giriş Yap
                         </Button>
                     </Form.Item>
                 </Form>
 
-                {/* Login Link */}
                 <div style={styles.registerLink}>
-                    Zaten bir hesabınız var mı?{' '}
+                    Hesabınız yok mu?{' '}
                     <span
-                        onClick={() => navigate('/')}
+                        onClick={() => navigate('/register')}
                         style={styles.registerText}
                     >
-                        Giriş Yap!
+                        Kayıt Ol!
                     </span>
                 </div>
             </Card>
@@ -105,7 +102,7 @@ const styles = {
         justifyContent: 'center',
         alignItems: 'center',
         height: '100vh',
-        backgroundColor: '#dcdcdc',
+        backgroundColor: '#001529',
     },
     card: {
         width: 400,
@@ -116,7 +113,7 @@ const styles = {
         padding: '10px',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',  // İçeriği en alta itiyor
+        justifyContent: 'space-between',
     },
     cardTitle: {
         fontSize: '28px',
@@ -129,12 +126,12 @@ const styles = {
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',  // Form öğeleri arasındaki boşluğu artırır
+        justifyContent: 'space-between',
     },
     input: {
         height: '40px',
         width: '100%',
-        // Her input arasına boşluk ekledik
+
     },
     loginButton: {
         backgroundColor: '#001529',
@@ -146,7 +143,7 @@ const styles = {
     },
     registerLink: {
         textAlign: 'center',
-        marginTop: '20px',  // Daha fazla boşluk eklemek için marginTop
+        marginTop: '20px',
         fontSize: '16px',
     },
     registerText: {
@@ -158,4 +155,4 @@ const styles = {
     },
 };
 
-export default RegisterPage;
+export default LoginPage;

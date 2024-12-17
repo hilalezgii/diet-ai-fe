@@ -1,24 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Form, Input, Button, Card } from 'antd';
 import { useNavigate } from 'react-router';
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { RobotOutlined, LockOutlined, MailOutlined, OpenAIOutlined } from '@ant-design/icons'; // Iconlar
+import {LockOutlined, MailOutlined, OpenAIOutlined} from '@ant-design/icons';
+import {useFetch} from "../../hooks/useFetch.tsx";
 
-// Vite environment variable ile servis URL'sine erişim
-const serviceUrl = import.meta.env.VITE_SERVICE_URL;
+interface Values {
+    email: string;
+    password: string;
+}
 
-const LoginPage: React.FC = () => {
-    const [loading, setLoading] = useState(false);
+const RegisterPage: React.FC = () => {
     const navigate = useNavigate();
-
-    interface Values {
-        email: string;
-        password: string;
-    }
+    const {_fetch} =useFetch()
 
     const onFinish = async (values: Values) => {
-        setLoading(true);
         const { email, password } = values;
 
         const requestData = {
@@ -27,42 +23,31 @@ const LoginPage: React.FC = () => {
         };
 
         try {
-            const response = await fetch(`${serviceUrl}/auth/login`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(requestData),
-            });
+            const fetchResponse = await _fetch({
+                url:'users/register',
+                method:'POST',
+                data:requestData
+            })
 
-            const data = await response.json();
-
-            if (response.ok) {
-                localStorage.setItem('token', data?.access_token || '');
-                toast.success('Giriş başarılı!', { position: "top-right", autoClose: 5000 });
-                setLoading(false);
-                navigate('/dashboard');
+            if (fetchResponse) {
+                toast.success('Başarıyla kayıt olundu. Lütfen giriş yapınız');
+                navigate('/');
             } else {
-                toast.error(data.message || 'Giriş başarısız, tekrar deneyin.', { position: "top-right", autoClose: 5000 });
-                setLoading(false);
+                toast.error('Lütfen bilgileri yeniden giriniz');
             }
         } catch (error) {
-            toast.error('Bir hata oluştu, lütfen tekrar deneyin.', { position: "top-right", autoClose: 5000 });
-            setLoading(false);
+            toast.error('Bir hata oluştu, lütfen tekrar deneyin.');
         }
     };
 
     return (
         <div style={styles.container}>
-            <Card title={<div style={styles.cardTitle}><OpenAIOutlined /> Giriş Yap  </div>} style={styles.card}>
+            <Card title={<div style={styles.cardTitle}><OpenAIOutlined /> Kayıt Ol</div>} style={styles.card}>
                 <Form
-                    name="login"
-                    initialValues={{ remember: true }}
+                    name="register"
                     onFinish={onFinish}
                     autoComplete="off"
-                    style={styles.form}
                 >
-                    {/* Email */}
                     <Form.Item
                         label="E-posta"
                         name="email"
@@ -72,33 +57,32 @@ const LoginPage: React.FC = () => {
                         ]}
                     >
                         <Input prefix={<MailOutlined />} placeholder="E-posta adresi" style={styles.input} />
+
                     </Form.Item>
 
-                    {/* Password */}
                     <Form.Item
                         label="Şifre"
                         name="password"
                         rules={[{ required: true, message: 'Lütfen şifrenizi girin!' }]}
                     >
                         <Input.Password prefix={<LockOutlined />} placeholder="Şifre" style={styles.input} />
+
                     </Form.Item>
 
-                    {/* Login Button */}
                     <Form.Item>
-                        <Button type="primary" htmlType="submit" block loading={loading} style={styles.loginButton}>
-                            Giriş Yap
+                        <Button type="primary" htmlType="submit" block loading={false} style={styles.loginButton}>
+                            Kayıt Ol
                         </Button>
                     </Form.Item>
                 </Form>
 
-                {/* Kayıt Ol Linki */}
                 <div style={styles.registerLink}>
-                    Hesabınız yok mu?{' '}
+                    Zaten bir hesabınız var mı?{' '}
                     <span
-                        onClick={() => navigate('/register')}
+                        onClick={() => navigate('/')}
                         style={styles.registerText}
                     >
-                        Kayıt Ol!
+                        Giriş Yap!
                     </span>
                 </div>
             </Card>
@@ -112,7 +96,7 @@ const styles = {
         justifyContent: 'center',
         alignItems: 'center',
         height: '100vh',
-        backgroundColor: '#dcdcdc',
+        backgroundColor: '#001529',
     },
     card: {
         width: 400,
@@ -123,12 +107,12 @@ const styles = {
         padding: '10px',
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between',  // İçeriği en alta itiyor
+        justifyContent: 'space-between',
     },
     cardTitle: {
         fontSize: '28px',
         fontWeight: 'bold',
-        textAlign: 'center',  // Burada 'center' tipi belirleniyor
+        textAlign: 'center',
         color: '#333',
         marginBottom: '20px',
     },
@@ -136,13 +120,11 @@ const styles = {
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        justifyContent: 'space-between', // Form öğeleri arasındaki boşluğu artırır
+        justifyContent: 'space-between',
     },
     input: {
         height: '40px',
         width: '100%',
-        // Input'ları daha yüksek yapmak için height artırdık
-        //marginBottom: '15px',  // Her input arasına boşluk ekledik
     },
     loginButton: {
         backgroundColor: '#001529',
@@ -153,8 +135,8 @@ const styles = {
         padding: '12px',
     },
     registerLink: {
-        textAlign: 'center',  // Burada 'center' tipi belirleniyor
-        marginTop: '20px',  // Daha fazla boşluk eklemek için marginTop
+        textAlign: 'center',
+        marginTop: '20px',
         fontSize: '16px',
     },
     registerText: {
@@ -166,4 +148,4 @@ const styles = {
     },
 };
 
-export default LoginPage;
+export default RegisterPage;
