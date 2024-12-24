@@ -19,7 +19,7 @@ interface IAiResult {
 
 const ChatbotPage: React.FC = () => {
     const { state } = useLocation();
-    const navigate = useNavigate(); // Kullanıcıyı yönlendirmek için
+    const navigate = useNavigate();
     const { _fetch, isLoading } = useFetch();
 
     const [messages, setMessages] = useState<Message[]>([]);
@@ -53,9 +53,8 @@ const ChatbotPage: React.FC = () => {
     };
 
     const handleLogout = () => {
-        // Çıkış işlemini burada yapabilirsiniz (örneğin, token'ı temizleme)
         localStorage.clear();
-        navigate('/'); // Login ekranına yönlendirme
+        navigate('/');
     };
     useEffect(() => {
         const storedUserDetails = JSON.parse(localStorage.getItem('user_detail') || '{}');

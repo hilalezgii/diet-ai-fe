@@ -56,9 +56,8 @@ const DashboardPage: React.FC = () => {
     };
 
     const handleLogout = () => {
-        // Çıkış işlemini burada yapabilirsiniz (örneğin, token'ı temizleme)
         localStorage.clear();
-        navigate('/'); // Login ekranına yönlendirme
+        navigate('/');
     };
 
     useEffect(() => {

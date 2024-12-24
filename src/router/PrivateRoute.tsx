@@ -1,10 +1,9 @@
 import React from "react";
 import { Navigate, Outlet } from "react-router";
 
-// Auth kontrolü (Örnek bir auth yapısı)
 const isAuthenticated = () => {
-    const token = localStorage.getItem("token"); // Token kontrolü
-    return !!token; // Token varsa true döner, yoksa false
+    const token = localStorage.getItem("token");
+    return !!token;
 };
 
 const PrivateRoute: React.FC = () => {

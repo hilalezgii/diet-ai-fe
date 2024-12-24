@@ -29,7 +29,7 @@ const RegisterPage: React.FC = () => {
                 data:requestData
             })
 
-            if (fetchResponse) {
+            if (fetchResponse?.id) {
                 toast.success('Başarıyla kayıt olundu. Lütfen giriş yapınız');
                 navigate('/');
             } else {
